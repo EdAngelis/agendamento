@@ -1,0 +1,24 @@
+{
+    "Dermatologia": {
+      "medicos": [
+          "Pernalonga",
+          "Patolino",
+          "Ligerinho"
+      ]        
+    },
+    "Cardiologia": {
+      "medicos": [
+        "Frajola",
+        "Piu-Piu",
+        "Papa-Léguas"
+      ]
+    }, 
+    "Gastroenterologia": {
+      "medicos": [
+        "Hortelino",
+        "Eufrazino",
+        "Gaguinho"
+
+      ]
+    }
+}
