@@ -4,7 +4,7 @@ const cors = require('cors');
 const agendamento = require('./controllers/agendamento-controllers');
 
 const app = new express();
-mongoose.connect('mongodb://DeAngelis84:ml2037@ds133557.mlab.com:33557/vuejs-estudo', { useNewUrlParser: true });
+mongoose.connect('mongodb://DeAngelis84:ml2037@ds049754.mlab.com:49754/agendamento', { useNewUrlParser: true });
 
 app.use(cors('*'));
 app.use(express.json());

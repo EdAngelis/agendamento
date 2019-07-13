@@ -1,39 +1,34 @@
 <template lang='pug'>
 v-container.pa-1.ma-0
   v-form
-    v-layout
+    v-layout(v-show="!logged")
       v-flex(md6 lg6 xs12 pr-2)
-        v-select(v-model="dadosConsulta.atendente"
+        v-select(v-model="atendente"
         box 
         :rules="[rules.required]" 
         :items="atendentes" label="Atendente")
       v-flex(md6 lg6 xs12 pr-3)
-        v-text-field(
-          v-model='dadosConsulta.senhaAtendente' 
+        v-text-field(v-on:keyup="verificarSenha"
+          v-model='senhaAtendente' 
           counter 
           label="Senha" 
           :append-icon="showSenha ? 'visibility' : 'visibility_off'"
           :type="showSenha ? 'text' : 'password'"
-          :rules="[rules.required, rules.min8]" 
+          :rules="[rules.required]" 
           @click:append="showSenha = !showSenha"
           required) 
-    v-flex(xs12)
-      v-text-field(
-        v-model='dadosConsulta.namePaciente' 
-        :rules="[rules.required]" 
-        label="Nome Paciente")
-    v-layout(wrap)  
+    v-layout(wrap v-show="logged")  
       v-flex(md6 lg6 xs12 pr-2)
         v-select(v-model="especialidade" 
         box
         :rules="[rules.required]" 
         :items="especialidades" label="Especialidade")
-      v-flex(md6 lg6 xs12 pr-2)
+      v-flex(md6 lg6 xs12 pr-2 v-show="dadosConsulta.especialidadeMedico != ''")
         v-select(v-model="dadosConsulta.nomeMedico" 
         box
         :rules="[rules.required]" 
         :items="medicosLista" label="Médico")
-    v-layout
+    v-layout(v-show="dadosConsulta.nomeMedico != ''")
       v-flex.pr-1(xs12 md6 lg6)
         v-menu( ref="menu"
           v-model="menu"
@@ -53,23 +48,28 @@ v-container.pa-1.ma-0
               v-on="on"
             )
           v-date-picker(v-model="date" @input="menu = false")
-      v-flex.pl-1(md6 lg6 xs12 pr-2)
+      v-flex.pl-1(md6 lg6 xs12 pr-2 v-show="dadosConsulta.dataAgendada != ''")
         v-select(v-model="dadosConsulta.horaAgendada" 
         :rules="[rules.required]" 
-        :items="horasDisponiveis" label="Hora")
-      
+        :items="horasDisponiveis" label="Horario Disponível")
+    v-layout  
+      v-flex(xs12 v-show="dadosConsulta.horaAgendada != ''")
+        v-text-field(
+          v-model='dadosConsulta.namePaciente' 
+          :rules="[rules.required]" 
+          label="Nome Paciente")
 </template>
 
 <script>
 import medicosFromJson from '../../public/medicos.json'
+import senhasJson from '../../public/senhas.json'
 export default {
   name: 'agendar-forms',
   data () {
     return {
-      showSenha: false,
+      showSenha: false, logged: false,
       dadosConsulta:{
         atendente: '',
-        senhaAtendente: '',
         namePaciente: '',
         especialidadeMedico: '',
         nomeMedico: '',
@@ -77,10 +77,13 @@ export default {
         horaAgendada: ''
 
       },
+      atendente: null,
+      senhaAtendente: '',
+      senhasJson,
       atendentes: [
-        { value: 'Lola Bunny', text: 'Lola Bunny', senha: '123' },
-        { value: 'Petúnio', text: 'Petúnio', senha: '123' },
-        { value: 'Pete Puma', text: 'Pete Puma', senha: '123' },
+        { value: 'Lola Bunny', text: 'Lola Bunny'},
+        { value: 'Petunio', text: 'Petúnio'},
+        { value: 'Pete Puma', text: 'Pete Puma'}
 
       ],
       especialidades: [
@@ -97,11 +100,6 @@ export default {
       horasDisponiveis: [],
       rules: {
         required: v => !!v || 'Campo requerido',
-        validEmail: v => /.+@.+/.test(v) || 'E-mail não valido',
-        min8: v => v.length >=8 || 'Mínimo de 8 caracteres',
-        confirmPassword: v => v === this.register.password || 'Senhas não conferem',
-        confirmEmail:  v => v === this.register.email || 'E-mails não conferem',
-        validCep: v => /^[0-9]{5}-[0-9]{3}$/.test(v) || 'Digite um cep valido'
       }
     }
   },
@@ -113,9 +111,26 @@ export default {
       },
       'date': function () {
         this.dadosConsulta.dataAgendada = this.date
-        console.log(this.dadosConsulta);
+        const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/verificar-horarios` 
+        this.axios.post( url, this.dadosConsulta)
+          .then(data => {
+            this.horasDisponiveis = data.data
+          })
+      },
+/*      'atendente': function () {
+        this.senhaAtendente = senhasJson[this.atendente].senha
+        console.log(this.senhaAtendente);
+        
+      } */
+  },
+  methods: {
+    verificarSenha () {
+      this.dadosConsulta.atendente = this.atendente
+      if (this.senhaAtendente === senhasJson[this.atendente].senha) {
+        this.logged = true
       }
-}
+    }
+  }
 }
 </script>
 
