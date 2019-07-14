@@ -1,6 +1,6 @@
 <template lang='pug'>
 v-container.pa-1.ma-0
-  v-form
+  v-form(ref="form")
     v-layout(v-show="!logged")
       v-flex(md6 lg6 xs12 pr-2)
         v-select(v-model="atendente"
@@ -17,18 +17,18 @@ v-container.pa-1.ma-0
           :rules="[rules.required]" 
           @click:append="showSenha = !showSenha"
           required) 
-    v-layout(wrap v-show="logged")  
-      v-flex(md6 lg6 xs12 pr-2)
+    v-layout(v-show="logged")  
+      v-flex(md6 lg6 sm6 xs12 pr-2)
         v-select(v-model="especialidade" 
         box
         :rules="[rules.required]" 
         :items="especialidades" label="Especialidade")
-      v-flex(md6 lg6 xs12 pr-2 v-show="dadosConsulta.especialidadeMedico != ''")
-        v-select(v-model="dadosConsulta.nomeMedico" 
+      v-flex(md6 lg6 sm6 xs12 pr-2 v-show="dadosConsulta.especialidade != ''")
+        v-select(v-model="dadosConsulta.medico" 
         box
         :rules="[rules.required]" 
         :items="medicosLista" label="Médico")
-    v-layout(v-show="dadosConsulta.nomeMedico != ''")
+    v-layout(v-show="dadosConsulta.medico != ''")
       v-flex.pr-1(xs12 md6 lg6)
         v-menu( ref="menu"
           v-model="menu"
@@ -47,17 +47,28 @@ v-container.pa-1.ma-0
               readonly
               v-on="on"
             )
-          v-date-picker(v-model="date" @input="menu = false")
-      v-flex.pl-1(md6 lg6 xs12 pr-2 v-show="dadosConsulta.dataAgendada != ''")
-        v-select(v-model="dadosConsulta.horaAgendada" 
+          v-date-picker(v-model="date" 
+          @input="menu = false"
+          :min="new Date().toISOString().substr(0, 10)")
+      v-flex.pl-1(md6 lg6 xs12 pr-2 v-show="dadosConsulta.data != ''")
+        v-select(v-model="dadosConsulta.hora" 
         :rules="[rules.required]" 
         :items="horasDisponiveis" label="Horario Disponível")
     v-layout  
-      v-flex(xs12 v-show="dadosConsulta.horaAgendada != ''")
+      v-flex(xs12 v-show="dadosConsulta.hora != ''")
         v-text-field(
-          v-model='dadosConsulta.namePaciente' 
+          v-model='dadosConsulta.paciente' 
           :rules="[rules.required]" 
           label="Nome Paciente")
+    v-layout
+      v-flex(v-if="dadosConsulta.paciente != ''")
+        v-btn(outline @click="marcarConsulta") Marcar Consulta
+    v-snackbar(
+      v-model="snackbar"
+      color="red"
+      bottom
+      vertical
+      :timeout= 3000 ) Consulta Agendada
 </template>
 
 <script>
@@ -67,14 +78,14 @@ export default {
   name: 'agendar-forms',
   data () {
     return {
-      showSenha: false, logged: false,
+      showSenha: false, logged: false, snackbar: false, menu: false,
       dadosConsulta:{
         atendente: '',
-        namePaciente: '',
-        especialidadeMedico: '',
-        nomeMedico: '',
-        dataAgendada: '',
-        horaAgendada: ''
+        paciente: '',
+        especialidade: '',
+        medico: '',
+        data: '',
+        hora: ''
 
       },
       atendente: null,
@@ -96,7 +107,6 @@ export default {
       medicosLista: [],
       medicosFromJson,
       date: new Date().toISOString().substr(0, 10),
-      menu: false,
       horasDisponiveis: [],
       rules: {
         required: v => !!v || 'Campo requerido',
@@ -107,12 +117,12 @@ export default {
       'especialidade': function () {
         //Busca as cidades do estado selecionado e põe na variavel Cidades
         this.medicosLista = medicosFromJson[this.especialidade].medicos
-        this.dadosConsulta.especialidadeMedico = this.especialidade
+        this.dadosConsulta.especialidade = this.especialidade
       },
       'date': function () {
-        this.dadosConsulta.dataAgendada = this.date
-        const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/verificar-horarios` 
-        this.axios.post( url, this.dadosConsulta)
+        this.dadosConsulta.data = this.date
+        const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/verificar-horarios`
+        this.axios.post( url , this.dadosConsulta)
           .then(data => {
             this.horasDisponiveis = data.data
           })
@@ -129,7 +139,28 @@ export default {
       if (this.senhaAtendente === senhasJson[this.atendente].senha) {
         this.logged = true
       }
-    }
+    },
+    marcarConsulta () {
+      const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/agendar-consulta`
+      this.axios.post( url, this.dadosConsulta )
+        .then(data => {
+          this.snackbar = true
+          this.$refs.form.reset()
+          this.logged = false
+          this.dadosConsulta.atendente = '',
+          this.dadosConsulta.paciente = '',
+          this.dadosConsulta.especialidade = '',
+          this.dadosConsulta.medico = '',
+          this.dadosConsulta.data = '',
+          this.dadosConsulta.hora = '',
+          this.senhaAtendente = '',
+          this.atendente = null,
+          this.especialidade = null,
+          this.medicosLista = [],
+          this.horasDisponiveis = []
+
+        })
+    },
   }
 }
 </script>
