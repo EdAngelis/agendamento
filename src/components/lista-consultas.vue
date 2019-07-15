@@ -13,8 +13,14 @@ v-container.ma-0.pa-0.fluid
         th {{consulta.paciente}}
         th {{consulta.medico}}
         th {{consulta.data | formatDateOnlyHour}}
-        v-btn(color="red" small outline @click="dialogDeleteOpen(consulta._id)") Cancelar Consulta
-        v-btn(color="info" small outline) Mudar Horario
+        div(v-if="windowWidth>750")  
+          v-btn(color="red" small outline @click="dialogDeleteOpen(consulta._id)") Cancelar Consulta
+          v-btn(color="info" small outline) Mudar Horario
+        div(v-if="windowWidth<750")  
+          v-btn(icon color="red" small outline @click="dialogDeleteOpen(consulta._id)")
+            v-icon delete
+          v-btn(icon color="info" small outline)
+            v-icon edit
   v-dialog(v-model="dialogDelete")
     v-container(center justify-center texte-center)
       v-card  
@@ -58,11 +64,12 @@ v-container.ma-0.pa-0.fluid
 </template>
 
 <script>
+import { vueWindowSizeMixin } from 'vue-window-size'
 import mixins from '../../src/mixins/mixins'
 import senhasJson from '../../public/senhas.json'
 export default {
   name: 'lista-consultas',
-  mixins: [mixins],
+  mixins: [mixins, vueWindowSizeMixin],
   data () {
     return {
       dialogDelete: false, confirmacaoDoAtendente: false, showSenha: false, logged: false, snackbar: false,
