@@ -5,8 +5,7 @@ const consulta = new schema({
     atendente: {type: String},
     especialidade: {type: String},
     medico: {type: String},
-    data: {type: String},
-    hora: {type: String},
+    data: {type: Date},
     paciente: {type: String}
 })
 

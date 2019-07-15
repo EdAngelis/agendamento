@@ -115,7 +115,6 @@ export default {
   },
   watch: {
       'especialidade': function () {
-        //Busca as cidades do estado selecionado e põe na variavel Cidades
         this.medicosLista = medicosFromJson[this.especialidade].medicos
         this.dadosConsulta.especialidade = this.especialidade
       },
@@ -127,11 +126,6 @@ export default {
             this.horasDisponiveis = data.data
           })
       },
-/*      'atendente': function () {
-        this.senhaAtendente = senhasJson[this.atendente].senha
-        console.log(this.senhaAtendente);
-        
-      } */
   },
   methods: {
     verificarSenha () {
@@ -141,6 +135,7 @@ export default {
       }
     },
     marcarConsulta () {
+      console.log(this.dadosConsulta)
       const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/agendar-consulta`
       this.axios.post( url, this.dadosConsulta )
         .then(data => {

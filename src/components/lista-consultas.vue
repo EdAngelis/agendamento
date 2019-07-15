@@ -6,6 +6,13 @@ v-container.ma-0.pa-0
 <script>
 export default {
   name: 'lista-consultas',
+  mounted () {
+    const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/listar-consultas`
+    this.axios.get(url)
+      .then(data => {
+        console.log(data)
+      })
+  }
   }
 </script>
 
