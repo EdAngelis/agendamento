@@ -95,7 +95,6 @@ export default {
         { value: 'Lola Bunny', text: 'Lola Bunny'},
         { value: 'Petunio', text: 'Petúnio'},
         { value: 'Pete Puma', text: 'Pete Puma'}
-
       ],
       especialidades: [
         { value: 'Dermatologia', text: 'Dermatologia'},
@@ -106,7 +105,7 @@ export default {
       especialidade: null,
       medicosLista: [],
       medicosFromJson,
-      date: new Date().toISOString().substr(0, 10),
+      date: '',
       horasDisponiveis: [],
       rules: {
         required: v => !!v || 'Campo requerido',

@@ -23,23 +23,23 @@ router.post('/agendar-consulta', async (req, res, next) => {
 router.get('/listar-consultas', async (req, res, next) => {
   await agendamentoSchema.find()
    .then(data => {
-     console.log(data)
      res.send(data)
    })
 });
-router.delete('/remover-consulta', async (req, res, next) => {
+router.delete('/remover-consulta/:id', async (req, res, next) => {
+  console.log(req.params.id)
   await agendamentoSchema.findByIdAndDelete({_id: req.params.id})
     .then(data => {
-      res.send("")
+      res.status(200).send('Consulta Cancelada')
     }).catch(err => {
-      res.send("")
+      res.status(404).send("")
     }) 
 })
 router.post('/verificar-horarios', async (req, res, next) => {
   var horariosDisponiveis = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30"]
   const day = req.body.data
   const endOfDay = moment(day).endOf('day')
-  const buscahorarios = await agendamentoSchema.find({data: {$gt: day, $lt: endOfDay}, medico: req.body.medico})
+  await agendamentoSchema.find({data: {$gt: day, $lt: endOfDay}, medico: req.body.medico})
     .then(result => {
       if(result.length === 0) {
         res.send(horariosDisponiveis)

@@ -10,9 +10,11 @@ v-container.pa-0.ma-0(fluid)
     v-flex(lg3 md3 sm0 xs0)
   toolbarComponent( @aba="mudarAba")
   //Conteúdo
-  v-content()
-    listarConsultas(v-if="aba != 'Nova Consulta'")
-    agendarComponent(v-if="aba === 'Nova Consulta'" @aba="mudarAba")
+  v-content.pa-0.ma-0.fluid
+    v-layout
+      v-flex(xs12)
+        listarConsultas(v-if="aba != 'Nova Consulta'")
+        agendarComponent(v-if="aba === 'Nova Consulta'" @aba="mudarAba")
 </template>
 
 <script>
