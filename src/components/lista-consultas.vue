@@ -35,7 +35,7 @@ v-container.ma-0.pa-0.fluid
         th(scope="col") Paciente
         th(scope="col") Medico
         th(scope="col") Hora
-        th(scope="col") {{consultasParaoTemplate.length}} Consultas
+        th(scope="col") {{consultasParaoTemplate.length}} 
     tbody
       tr(v-for="(consulta, i) in consultasParaoTemplate" :key="i")
         th(scope="row") {{consulta.data | formatDate}}

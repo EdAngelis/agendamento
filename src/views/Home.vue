@@ -14,7 +14,7 @@ v-container.pa-0.ma-0(fluid)
     v-layout
       v-flex(xs12)
         listarConsultas( v-if="aba === 'Agendamentos'")
-        agendarComponent( :listarConsultas="listarConsultas" v-if="aba === 'Nova Consulta'")
+        agendarComponent( v-if="aba === 'Nova Consulta'")
         listaHistorico( v-if="aba === 'Historico'")
 </template>
 

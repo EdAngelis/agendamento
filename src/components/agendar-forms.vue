@@ -14,7 +14,7 @@ v-container.pa-1.ma-0
           label="Senha Padrão 123" 
           :append-icon="showSenha ? 'visibility' : 'visibility_off'"
           :type="showSenha ? 'text' : 'password'"
-          :rules="[rules.required]" 
+          :rules="[rules.required, rules.checkPassord]" 
           @click:append="showSenha = !showSenha"
           required) 
     v-layout(v-show="logged")  
@@ -72,11 +72,12 @@ v-container.pa-1.ma-0
 </template>
 
 <script>
+import mixins from '../mixins/mixins'
 import medicosFromJson from '../../public/medicos.json'
 import senhasJson from '../../public/senhas.json'
 export default {
   name: 'agendar-forms',
-  props: {},
+  mixins: [mixins],
   data () {
     return {
       showSenha: false, logged: false, snackbar: false, menu: false,
@@ -92,6 +93,7 @@ export default {
       atendente: null,
       senhaAtendente: '',
       senhasJson,
+      senha: '',
       atendentes: [
         { value: 'Lola Bunny', text: 'Lola Bunny'},
         { value: 'Petunio', text: 'Petúnio'},
@@ -108,23 +110,28 @@ export default {
       medicosFromJson,
       date: '',
       horasDisponiveis: [],
-      rules: {
-        required: v => !!v || 'Campo requerido',
-      }
+      
     }
   },
   watch: {
+      'atendente': function () {
+        this.senha = senhasJson[this.atendente].senha
+        },
       'especialidade': function () {
+        if( this.especialidade != '') {
         this.medicosLista = medicosFromJson[this.especialidade].medicos
         this.dadosConsulta.especialidade = this.especialidade
+        }
       },
       'date': function () {
+        if ( this.date != '') {
         this.dadosConsulta.data = this.date
         const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/verificar-horarios`
         this.axios.post( url , this.dadosConsulta)
           .then(data => {
             this.horasDisponiveis = data.data
           })
+        }
       },
   },
   methods: {
