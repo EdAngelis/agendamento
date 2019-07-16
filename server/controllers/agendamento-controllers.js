@@ -54,4 +54,20 @@ router.post('/verificar-horarios', async (req, res, next) => {
       }
     })
 })
+
+router.put('/editar-consulta', async (req, res, next) => {
+  await agendamentoSchema.findByIdAndUpdate({_id: req.body._id})
+        .then(result => {
+          const newData = moment(`${req.body.data} ${req.body.hora}`).format("YYYY MM DD HH:mm")
+          result.data = newData
+          result.save()
+            .then(data => {
+              res.status(200).send('Cunsulta Editada')
+            }).catch(err => {
+               res.status(404).send('Consulta não Salva')
+            })
+        }).catch (err => {
+          res.status(404).send('Banco não acessado')
+        })
+})
 module.exports = router;
