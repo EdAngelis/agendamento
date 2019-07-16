@@ -1,5 +1,33 @@
 <template lang='pug'>
 v-container.ma-0.pa-0.fluid
+  v-layout()
+    v-flex.ml-3(lg2 md2 sm2 xs4)
+      v-btn(outline @click="listarTodos") Todas
+    v-flex(lg4 md4 sm4 xs6)
+      v-select(v-model="medicoSecionado" 
+      :items="listaDeMedicos" 
+      label="Por Medico")
+    v-flex(lg4 md4 sm4 xs6)
+      v-menu( ref="menu2"
+        v-model="menu2"
+        :close-on-content-click="false"
+        :nudge-right="40"
+        lazy
+        transition="scale-transition"
+        offset-y
+        full-width
+        min-width="290px"
+        )
+        template(v-slot:activator="{ on }")
+          v-text-field(v-model="dataSelecionada"
+            label="Por Data "
+            prepend-icon="event"
+            readonly
+            v-on="on"
+          )
+        v-date-picker(v-model="dataSelecionada" 
+        @input="menu2 = false"
+        :min="new Date().toISOString().substr(0, 10)")
   table.table.table
     thead
       tr
@@ -7,8 +35,9 @@ v-container.ma-0.pa-0.fluid
         th(scope="col") Paciente
         th(scope="col") Medico
         th(scope="col") Hora
+        th(scope="col") {{consultasOrdenados.length}} Consultas
     tbody
-      tr(v-for="(consulta, i) in consultas" :key="i")
+      tr(v-for="(consulta, i) in consultasOrdenados" :key="i")
         th(scope="row") {{consulta.data | formatDate}}
         th {{consulta.paciente}}
         th {{consulta.medico}}
@@ -122,7 +151,9 @@ v-container.ma-0.pa-0.fluid
 </template>
 
 <script>
+import moment from 'moment'
 import { vueWindowSizeMixin } from 'vue-window-size'
+import medicosFromJson from '../../public/medicos.json'
 import mixins from '../../src/mixins/mixins'
 import senhasJson from '../../public/senhas.json'
 export default {
@@ -131,11 +162,15 @@ export default {
   data () {
     return {
       dialogDelete: false, confirmacaoDoAtendente: false, showSenha: false, logged: false, snackbar: false,
-      editDialog: false, menu: false,
+      editDialog: false, menu: false, menu2: false,
       fields: ['data', 'paciente', 'medico', 'hora',],
       consultas: [],
-      itensOrdenados: [],
+      listaConsultasBase: [],
+      consultasOrdenados: [],
+      consultasPorMedico: [],
+      consultasPorData: [],
       horasDisponiveis: [],
+      medicos: [],
       consultaParaCancelar: {},
       consultaParaEditar: {},
       dadosParaEditar: {
@@ -145,6 +180,8 @@ export default {
         _id: ''
       },
       atendente: null,
+      medicoSecionado: null,
+      dataSelecionada: '',
       senhaAtendente: '',
       senha: '',
       date: '',
@@ -156,21 +193,9 @@ export default {
       ],
     }
   },
-  updated () {
-    const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/listar-consultas`
-    this.axios.get(url)
-      .then(data => {
-        this.consultas = data.data
-        this.itensOrdenados = this.consultas.sort( ( a, b ) => new Date(a.data) - new Date(b.data))
-      })
-  },
   mounted () {
-    const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/listar-consultas`
-    this.axios.get(url)
-      .then(data => {
-        this.consultas = data.data
-        this.itensOrdenados = this.consultas.sort( ( a, b ) => new Date(a.data) - new Date(b.data))
-      })
+    //Puxar e Ordenar lista de consultas
+    this.listarConsultas() 
   },
   watch: {
       'atendente': function () {
@@ -185,9 +210,50 @@ export default {
           .then(data => {
             this.horasDisponiveis = data.data
           })
+      },
+      'medicoSecionado': function () {
+        this.consultasOrdenados = []
+        for (let i = 0; i < this.listaConsultasBase.length; i++) {
+          const element = this.listaConsultasBase[i];
+          if(element.medico === this.medicoSecionado){
+            this.consultasOrdenados.push(element)
+            console.log(this.consultasOrdenados)
+          }
+        }
+      },
+      'dataSelecionada': function () {
+        this.consultasOrdenados = []
+        for (let i = 0; i < this.listaConsultasBase.length; i++) {
+          const element = this.listaConsultasBase[i];
+          const elementDate = moment(element.data).format("YYYY MM DD")
+          const dataSelecionada = moment(this.dataSelecionada).format("YYYY MM DD")
+          console.log(elementDate)
+          console.log(dataSelecionada)
+          if(elementDate === dataSelecionada){
+            this.consultasOrdenados.push(element)
+            console.log(this.consultasOrdenados)
+          }
+        }
       }
+
   },
   methods: {
+    listarConsultas() {
+    //Puxar e Ordenar lista de consultas
+    const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/listar-consultas`
+    this.axios.get(url)
+      .then(data => {
+        this.consultas = data.data
+        this.consultasOrdenados = this.consultas.sort( ( a, b ) => new Date(a.data) - new Date(b.data))
+        this.listaConsultasBase = this.consultasOrdenados
+      })
+    },
+    listarTodos () {
+        this.listarConsultas()
+        this.medicoSecionado = null
+        this.dataSelecionada = ''
+      },
+
     dialogDeleteOpen(idConsulta) {
       for (let i = 0; i < this.consultas.length; i++) {
         const element = this.consultas[i];
