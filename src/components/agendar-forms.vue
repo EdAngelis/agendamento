@@ -11,7 +11,7 @@ v-container.pa-1.ma-0
         v-text-field(v-on:keyup="verificarSenha"
           v-model='senhaAtendente' 
           counter 
-          label="Senha" 
+          label="Senha Padrão 123" 
           :append-icon="showSenha ? 'visibility' : 'visibility_off'"
           :type="showSenha ? 'text' : 'password'"
           :rules="[rules.required]" 
@@ -76,6 +76,7 @@ import medicosFromJson from '../../public/medicos.json'
 import senhasJson from '../../public/senhas.json'
 export default {
   name: 'agendar-forms',
+  props: {},
   data () {
     return {
       showSenha: false, logged: false, snackbar: false, menu: false,
@@ -152,7 +153,7 @@ export default {
           this.especialidade = null,
           this.medicosLista = [],
           this.horasDisponiveis = []
-
+          this.$emit('atualizarDados')
         })
     },
   }

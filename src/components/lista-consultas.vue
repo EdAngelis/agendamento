@@ -35,9 +35,9 @@ v-container.ma-0.pa-0.fluid
         th(scope="col") Paciente
         th(scope="col") Medico
         th(scope="col") Hora
-        th(scope="col") {{consultasOrdenados.length}} Consultas
+        th(scope="col") {{consultasParaoTemplate.length}} Consultas
     tbody
-      tr(v-for="(consulta, i) in consultasOrdenados" :key="i")
+      tr(v-for="(consulta, i) in consultasParaoTemplate" :key="i")
         th(scope="row") {{consulta.data | formatDate}}
         th {{consulta.paciente}}
         th {{consulta.medico}}
@@ -165,8 +165,8 @@ export default {
       editDialog: false, menu: false, menu2: false,
       fields: ['data', 'paciente', 'medico', 'hora',],
       consultas: [],
-      listaConsultasBase: [],
-      consultasOrdenados: [],
+      consultasFuturas: [],
+      consultasParaoTemplate: [],
       consultasPorMedico: [],
       consultasPorData: [],
       horasDisponiveis: [],
@@ -194,8 +194,7 @@ export default {
     }
   },
   mounted () {
-    //Puxar e Ordenar lista de consultas
-    this.listarConsultas() 
+    this.atualizarDados()
   },
   watch: {
       'atendente': function () {
@@ -212,46 +211,38 @@ export default {
           })
       },
       'medicoSecionado': function () {
-        this.consultasOrdenados = []
-        for (let i = 0; i < this.listaConsultasBase.length; i++) {
-          const element = this.listaConsultasBase[i];
-          if(element.medico === this.medicoSecionado){
-            this.consultasOrdenados.push(element)
-            console.log(this.consultasOrdenados)
+        if ( this.medicoSecionado != null) {  
+          this.consultasParaoTemplate = []
+          for (let i = 0; i < this.consultasFuturas.length; i++) {
+            const element = this.consultasFuturas[i];
+            if(element.medico === this.medicoSecionado){
+              this.consultasParaoTemplate.push(element)
+            }
           }
-        }
+        }        
       },
       'dataSelecionada': function () {
-        this.consultasOrdenados = []
-        for (let i = 0; i < this.listaConsultasBase.length; i++) {
-          const element = this.listaConsultasBase[i];
-          const elementDate = moment(element.data).format("YYYY MM DD")
-          const dataSelecionada = moment(this.dataSelecionada).format("YYYY MM DD")
-          console.log(elementDate)
-          console.log(dataSelecionada)
-          if(elementDate === dataSelecionada){
-            this.consultasOrdenados.push(element)
-            console.log(this.consultasOrdenados)
+        if ( this.dataSelecionada != ''){
+          this.consultasParaoTemplate = []
+          for (let i = 0; i < this.consultasFuturas.length; i++) {
+            const element = this.consultasFuturas[i];
+            const elementDate = moment(element.data).format("YYYY MM DD")
+            const dataSelecionada = moment(this.dataSelecionada).format("YYYY MM DD")
+            console.log(elementDate)
+            console.log(dataSelecionada)
+            if(elementDate === dataSelecionada){
+              this.consultasParaoTemplate.push(element)
+              console.log(this.consultasParaoTemplate)
+            }
           }
         }
       }
-
   },
   methods: {
-    listarConsultas() {
-    //Puxar e Ordenar lista de consultas
-    const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/listar-consultas`
-    this.axios.get(url)
-      .then(data => {
-        this.consultas = data.data
-        this.consultasOrdenados = this.consultas.sort( ( a, b ) => new Date(a.data) - new Date(b.data))
-        this.listaConsultasBase = this.consultasOrdenados
-      })
-    },
     listarTodos () {
-        this.listarConsultas()
         this.medicoSecionado = null
         this.dataSelecionada = ''
+        this.consultasParaoTemplate = this.consultasFuturas
       },
 
     dialogDeleteOpen(idConsulta) {
@@ -264,8 +255,8 @@ export default {
       this.dialogDelete = !this.dialogDelete;
     },
     dialogEditOpen(idConsulta) {
-      for (let i = 0; i < this.consultas.length; i++) {
-        const element = this.consultas[i];
+      for (let i = 0; i < this.consultasFuturas.length; i++) {
+        const element = this.consultasFuturas[i];
         if (element._id === idConsulta) {
           this.consultaParaEditar = element;
         }
@@ -290,6 +281,7 @@ export default {
           this.dialogDelete = false
           this.logged = false
           this.senhaAtendente = ''
+          this.atualizarDados()
         })
     },
     editarConsulta () {
@@ -305,9 +297,27 @@ export default {
           this.dadosParaEditar.data = ''
           this. dadosParaEditar.hora = ''
           this.date = ''
+          this.atualizarDados()
+        
         })
        
-    }
+    },
+    atualizarDados() {
+      //Puxar e Ordenar lista de consultas
+      this.consultasFuturas = []
+      const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/listar-consultas`
+       this.axios.get(url)
+        .then(data => {
+          const listaConsultasBase = data.data.sort( ( a, b ) => new Date(a.data) - new Date(b.data))
+          for (let i = 0; i < listaConsultasBase.length; i++) {
+          const element = listaConsultasBase[i];
+            if(new Date(element.data) >= new Date()) {
+              this.consultasFuturas.push(element)    
+            }
+          }
+          this.consultasParaoTemplate = this.consultasFuturas
+        })
+        },    
   }
 }
 </script>

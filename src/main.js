@@ -10,7 +10,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 
 Vue.filter('formatDateOnlyHour', function(value) {
   if (value) {
-    return moment(String(value)).format('hh:mm')
+    return moment(String(value)).format('HH:mm')
   }
 })
 Vue.filter('formatDate', function(value) {

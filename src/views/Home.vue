@@ -13,11 +13,13 @@ v-container.pa-0.ma-0(fluid)
   v-content.pa-0.ma-0.fluid
     v-layout
       v-flex(xs12)
-        listarConsultas(v-if="aba != 'Nova Consulta'")
-        agendarComponent(v-if="aba === 'Nova Consulta'" @aba="mudarAba")
+        listarConsultas( v-if="aba === 'Agendamentos'")
+        agendarComponent( :listarConsultas="listarConsultas" v-if="aba === 'Nova Consulta'")
+        listaHistorico( v-if="aba === 'Historico'")
 </template>
 
 <script>
+import listaHistorico from '../components/lista-historico'
 import listarConsultas from '../components/lista-consultas'
 import agendarComponent from '../components/agendar-forms'
 import toolbarComponent from '../components/toolbar'
@@ -25,11 +27,12 @@ export default {
   components: {
     toolbarComponent,
     agendarComponent,
-    listarConsultas
+    listarConsultas,
+    listaHistorico
   },
   data () {
     return {
-      aba: "",
+      aba: "Agendamentos",
     }
   },
   methods: {
