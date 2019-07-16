@@ -10,20 +10,12 @@ npm install
 npm run serve
 ```
 
-### Compiles and minifies for production
+### back-end in node js, to initialize
 ```
-npm run build
-```
-
-### Run your tests
-```
-npm run test
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
+cd server
+npm install
+node index.js
+`````
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
