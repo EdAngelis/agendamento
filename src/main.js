@@ -8,12 +8,12 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
-Vue.filter('formatDateOnlyHour', function(value) {
+Vue.filter('formatDateOnlyHour', function (value) {
   if (value) {
     return moment(String(value)).format('HH:mm')
   }
 })
-Vue.filter('formatDate', function(value) {
+Vue.filter('formatDate', function (value) {
   if (value) {
     return moment(String(value)).format('DD MM YYYY')
   }

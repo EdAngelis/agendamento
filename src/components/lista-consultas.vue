@@ -1,13 +1,16 @@
 <template lang='pug'>
 v-container.ma-0.pa-0.fluid
-  v-layout()
+  v-layout.pa-2(wrap)
     v-flex.ml-3(lg2 md2 sm2 xs4)
       v-btn(outline @click="listarTodos") Todas
-    v-flex(lg4 md4 sm4 xs6)
-      v-select(v-model="medicoSecionado" 
-      :items="listaDeMedicos" 
+    v-flex.pr-3(lg3 md3 sm4 xs6)
+      v-select(v-model="medicoSecionado"
+      :items="listaDeMedicos"
       label="Por Medico")
-    v-flex(lg4 md4 sm4 xs6)
+    v-flex.pr-3(md3 lg3 sm4 xs6 pr-2)
+      v-select(v-model="especialidadeSelecionada"
+      :items="especialidades" label="Por Especialidade")  
+    v-flex(lg2 md2 sm4 xs6)
       v-menu( ref="menu2"
         v-model="menu2"
         :close-on-content-click="false"
@@ -25,7 +28,7 @@ v-container.ma-0.pa-0.fluid
             readonly
             v-on="on"
           )
-        v-date-picker(v-model="dataSelecionada" 
+        v-date-picker(v-model="dataSelecionada"
         @input="menu2 = false"
         :min="new Date().toISOString().substr(0, 10)")
   table.table.table
@@ -34,25 +37,27 @@ v-container.ma-0.pa-0.fluid
         th(scope="col") Data
         th(scope="col") Paciente
         th(scope="col") Medico
+        th(scope="col") Especialidade
         th(scope="col") Hora
-        th(scope="col") {{consultasParaoTemplate.length}} 
+        th(scope="col") {{consultasParaoTemplate.length}}
     tbody
       tr(v-for="(consulta, i) in consultasParaoTemplate" :key="i")
         th(scope="row") {{consulta.data | formatDate}}
         th {{consulta.paciente}}
         th {{consulta.medico}}
+        th {{consulta.especialidade}}
         th {{consulta.data | formatDateOnlyHour}}
-        div(v-if="windowWidth>700")  
+        div(v-if="windowWidth>700")
           v-btn(color="red" small outline @click="dialogDeleteOpen(consulta._id)") Cancelar Consulta
           v-btn(color="info" small outline @click="dialogEditOpen(consulta._id)") Mudar Horario
-        div(v-if="windowWidth<700")  
+        div(v-if="windowWidth<700")
           v-btn(icon color="red" small outline @click="dialogDeleteOpen(consulta._id)")
             v-icon delete
           v-btn(icon color="info" small outline @click="dialogEditOpen(consulta._id)")
             v-icon edit
   v-dialog(v-model="dialogDelete")
     v-container
-      v-card  
+      v-card
         table.table.table
           thead
             tr
@@ -69,19 +74,19 @@ v-container.ma-0.pa-0.fluid
         v-layout(wrap)
           v-flex.mr-3.ml-3(sm4 md4 lg4 xs12 )
             v-select(v-model="atendente"
-            :rules="[rules.required]" 
+            :rules="[rules.required]"
             :items="atendentes" label="Atendente")
-          v-flex(sm4 md4 lg4 xs12 )
+          v-flex.mr-3.ml-3(sm4 md4 lg4 xs12 )
             v-text-field(v-on:keyup="verificarSenha"
-              v-model='senhaAtendente' 
-              counter 
-              label="Senha" 
+              v-model='senhaAtendente'
+              counter
+              label="Senha"
               :append-icon="showSenha ? 'visibility' : 'visibility_off'"
               :type="showSenha ? 'text' : 'password'"
-              :rules="[rules.required, rules.checkPassord]" 
+              :rules="[rules.required, rules.checkPassord]"
               @click:append="showSenha = !showSenha"
-              required) 
-          v-card-actions
+              required)
+          v-card-actions.ml-3
             v-layout
               v-btn(color="warning" @click="cancelarConsulta" :disabled="!logged") Cancelar Consulta
   v-dialog(v-model="editDialog")
@@ -118,28 +123,28 @@ v-container.ma-0.pa-0.fluid
                 readonly
                 v-on="on"
               )
-            v-date-picker(v-model="date" 
+            v-date-picker(v-model="date"
             @input="menu = false"
             :min="new Date().toISOString().substr(0, 10)")
         v-flex.pl-1(md6 lg6 xs12 pr-2 v-show="dadosParaEditar.data != ''")
-          v-select(v-model="dadosParaEditar.hora" 
-          :rules="[rules.required]" 
+          v-select(v-model="dadosParaEditar.hora"
+          :rules="[rules.required]"
           :items="horasDisponiveis" label="Horario Disponível")
       v-layout(wrap)
         v-flex.mr-3.ml-3(sm4 md4 lg4 xs12 )
           v-select(v-model="atendente"
-          :rules="[rules.required]" 
+          :rules="[rules.required]"
           :items="atendentes" label="Atendente")
         v-flex(sm4 md4 lg4 xs12 )
           v-text-field(v-on:keyup="verificarSenha"
-            v-model='senhaAtendente' 
-            counter 
-            label="Senha" 
+            v-model='senhaAtendente'
+            counter
+            label="Senha"
             :append-icon="showSenha ? 'visibility' : 'visibility_off'"
             :type="showSenha ? 'text' : 'password'"
-            :rules="[rules.required, rules.checkPassord]" 
+            :rules="[rules.required, rules.checkPassord]"
             @click:append="showSenha = !showSenha"
-            required) 
+            required)
       v-card-actions
         v-btn(color="warning" @click="editarConsulta" :disabled="!logged") Mudar Horario
   v-snackbar(
@@ -161,9 +166,15 @@ export default {
   mixins: [mixins, vueWindowSizeMixin],
   data () {
     return {
-      dialogDelete: false, confirmacaoDoAtendente: false, showSenha: false, logged: false, snackbar: false,
-      editDialog: false, menu: false, menu2: false,
-      fields: ['data', 'paciente', 'medico', 'hora',],
+      dialogDelete: false,
+      confirmacaoDoAtendente: false,
+      showSenha: false,
+      logged: false,
+      snackbar: false,
+      editDialog: false,
+      menu: false,
+      menu2: false,
+      fields: ['data', 'paciente', 'medico', 'hora'],
       consultas: [],
       consultasFuturas: [],
       consultasParaoTemplate: [],
@@ -181,98 +192,109 @@ export default {
       },
       atendente: null,
       medicoSecionado: null,
+      especialidadeSelecionada: null,
       dataSelecionada: '',
       senhaAtendente: '',
       senha: '',
       date: '',
       msg: '',
       atendentes: [
-        { value: 'Lola Bunny', text: 'Lola Bunny'},
-        { value: 'Petunio', text: 'Petúnio'},
-        { value: 'Pete Puma', text: 'Pete Puma'}
-      ],
+        { value: 'Lola Bunny', text: 'Lola Bunny' },
+        { value: 'Petunio', text: 'Petúnio' },
+        { value: 'Pete Puma', text: 'Pete Puma' }
+      ]
     }
   },
   mounted () {
     this.atualizarDados()
   },
   watch: {
-      'atendente': function () {
+    'atendente': function () {
       this.senha = senhasJson[this.atendente].senha
-      },
-      'date': function () {
-        this.dadosParaEditar.data = this.date
-        this.dadosParaEditar.medico = this.consultaParaEditar.medico
-        console.log(this.dadosParaEditar)
-        const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/verificar-horarios`
-        this.axios.post( url , this.dadosParaEditar)
-          .then(data => {
-            this.horasDisponiveis = data.data
-          })
-      },
-      'medicoSecionado': function () {
-        if ( this.medicoSecionado != null) {  
-          this.consultasParaoTemplate = []
-          for (let i = 0; i < this.consultasFuturas.length; i++) {
-            const element = this.consultasFuturas[i];
-            if(element.medico === this.medicoSecionado){
-              this.consultasParaoTemplate.push(element)
-            }
-          }
-        }        
-      },
-      'dataSelecionada': function () {
-        if ( this.dataSelecionada != ''){
-          this.consultasParaoTemplate = []
-          for (let i = 0; i < this.consultasFuturas.length; i++) {
-            const element = this.consultasFuturas[i];
-            const elementDate = moment(element.data).format("YYYY MM DD")
-            const dataSelecionada = moment(this.dataSelecionada).format("YYYY MM DD")
-            console.log(elementDate)
-            console.log(dataSelecionada)
-            if(elementDate === dataSelecionada){
-              this.consultasParaoTemplate.push(element)
-              console.log(this.consultasParaoTemplate)
-            }
+    },
+    'date': function () {
+      this.dadosParaEditar.data = this.date
+      this.dadosParaEditar.medico = this.consultaParaEditar.medico
+      console.log(this.dadosParaEditar)
+      const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/verificar-horarios`
+      this.axios.post(url, this.dadosParaEditar)
+        .then(data => {
+          this.horasDisponiveis = data.data
+        })
+    },
+    'medicoSecionado': function () {
+      if (this.medicoSecionado != null) {
+        this.consultasParaoTemplate = []
+        for (let i = 0; i < this.consultasFuturas.length; i++) {
+          const element = this.consultasFuturas[i]
+          if (element.medico === this.medicoSecionado) {
+            this.consultasParaoTemplate.push(element)
           }
         }
       }
+    },
+    'especialidadeSelecionada': function () {
+      if (this.especialidadeSelecionada != null) {
+        this.consultasParaoTemplate = []
+        for (let i = 0; i < this.consultasFuturas.length; i++) {
+          const element = this.consultasFuturas[i]
+          if (element.especialidade === this.especialidadeSelecionada) {
+            this.consultasParaoTemplate.push(element)
+          }
+        }
+      }
+    },
+    'dataSelecionada': function () {
+      if (this.dataSelecionada != '') {
+        this.consultasParaoTemplate = []
+        for (let i = 0; i < this.consultasFuturas.length; i++) {
+          const element = this.consultasFuturas[i]
+          const elementDate = moment(element.data).format('YYYY MM DD')
+          const dataSelecionada = moment(this.dataSelecionada).format('YYYY MM DD')
+          console.log(elementDate)
+          console.log(dataSelecionada)
+          if (elementDate === dataSelecionada) {
+            this.consultasParaoTemplate.push(element)
+            console.log(this.consultasParaoTemplate)
+          }
+        }
+      }
+    }
   },
   methods: {
     listarTodos () {
-        this.medicoSecionado = null
-        this.dataSelecionada = ''
-        this.consultasParaoTemplate = this.consultasFuturas
-      },
-
-    dialogDeleteOpen(idConsulta) {
-      for (let i = 0; i < this.consultas.length; i++) {
-        const element = this.consultas[i];
-        if (element._id === idConsulta) {
-          this.consultaParaCancelar = element;
-        }
-      }
-      this.dialogDelete = !this.dialogDelete;
+      this.medicoSecionado = null
+      this.especialidadeSelecionada = null
+      this.dataSelecionada = ''
+      this.consultasParaoTemplate = this.consultasFuturas
     },
-    dialogEditOpen(idConsulta) {
+
+    dialogDeleteOpen (idConsulta) {
       for (let i = 0; i < this.consultasFuturas.length; i++) {
-        const element = this.consultasFuturas[i];
+        const element = this.consultasFuturas[i]
         if (element._id === idConsulta) {
-          this.consultaParaEditar = element;
+          this.consultaParaCancelar = element
         }
       }
-      this.editDialog = !this.editDialog;
+      this.dialogDelete = !this.dialogDelete
+    },
+    dialogEditOpen (idConsulta) {
+      for (let i = 0; i < this.consultasFuturas.length; i++) {
+        const element = this.consultasFuturas[i]
+        if (element._id === idConsulta) {
+          this.consultaParaEditar = element
+        }
+      }
+      this.editDialog = !this.editDialog
     },
     verificarSenha () {
       if (this.senhaAtendente === this.senha) {
         this.logged = true
-      }
-      else
-      {
+      } else {
         this.logged = false
-      }    
-  },
-    cancelarConsulta ()  {
+      }
+    },
+    cancelarConsulta () {
       const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/remover-consulta/${this.consultaParaCancelar._id}`
       this.axios.delete(url)
         .then(res => {
@@ -281,6 +303,8 @@ export default {
           this.dialogDelete = false
           this.logged = false
           this.senhaAtendente = ''
+          this.senha = ''
+          this.atendente = null
           this.atualizarDados()
         })
     },
@@ -295,29 +319,27 @@ export default {
           this.logged = false
           this.senhaAtendente = ''
           this.dadosParaEditar.data = ''
-          this. dadosParaEditar.hora = ''
+          this.dadosParaEditar.hora = ''
           this.date = ''
           this.atualizarDados()
-        
         })
-       
     },
-    atualizarDados() {
-      //Puxar e Ordenar lista de consultas
+    atualizarDados () {
+      // Puxar e Ordenar lista de consultas
       this.consultasFuturas = []
       const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/listar-consultas`
-       this.axios.get(url)
+      this.axios.get(url)
         .then(data => {
-          const listaConsultasBase = data.data.sort( ( a, b ) => new Date(a.data) - new Date(b.data))
+          const listaConsultasBase = data.data.sort((a, b) => new Date(a.data) - new Date(b.data))
           for (let i = 0; i < listaConsultasBase.length; i++) {
-          const element = listaConsultasBase[i];
-            if(new Date(element.data) >= new Date()) {
-              this.consultasFuturas.push(element)    
+            const element = listaConsultasBase[i]
+            if (new Date(element.data) >= new Date()) {
+              this.consultasFuturas.push(element)
             }
           }
           this.consultasParaoTemplate = this.consultasFuturas
         })
-        },    
+    }
   }
 }
 </script>

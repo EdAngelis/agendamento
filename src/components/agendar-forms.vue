@@ -4,29 +4,29 @@ v-container.pa-1.ma-0
     v-layout(v-show="!logged")
       v-flex(md6 lg6 xs12 pr-2)
         v-select(v-model="atendente"
-        box 
-        :rules="[rules.required]" 
+        box
+        :rules="[rules.required]"
         :items="atendentes" label="Atendente")
       v-flex(md6 lg6 xs12 pr-3)
         v-text-field(v-on:keyup="verificarSenha"
-          v-model='senhaAtendente' 
-          counter 
-          label="Senha Padrão 123" 
+          v-model='senhaAtendente'
+          counter
+          label="Senha Padrão 123"
           :append-icon="showSenha ? 'visibility' : 'visibility_off'"
           :type="showSenha ? 'text' : 'password'"
-          :rules="[rules.required, rules.checkPassord]" 
+          :rules="[rules.required, rules.checkPassord]"
           @click:append="showSenha = !showSenha"
-          required) 
-    v-layout(v-show="logged")  
+          required)
+    v-layout(v-show="logged")
       v-flex(md6 lg6 sm6 xs12 pr-2)
-        v-select(v-model="especialidade" 
+        v-select(v-model="especialidade"
         box
-        :rules="[rules.required]" 
+        :rules="[rules.required]"
         :items="especialidades" label="Especialidade")
       v-flex(md6 lg6 sm6 xs12 pr-2 v-show="dadosConsulta.especialidade != ''")
-        v-select(v-model="dadosConsulta.medico" 
+        v-select(v-model="dadosConsulta.medico"
         box
-        :rules="[rules.required]" 
+        :rules="[rules.required]"
         :items="medicosLista" label="Médico")
     v-layout(v-show="dadosConsulta.medico != ''")
       v-flex.pr-1(xs12 md6 lg6)
@@ -47,18 +47,18 @@ v-container.pa-1.ma-0
               readonly
               v-on="on"
             )
-          v-date-picker(v-model="date" 
+          v-date-picker(v-model="date"
           @input="menu = false"
           :min="new Date().toISOString().substr(0, 10)")
       v-flex.pl-1(md6 lg6 xs12 pr-2 v-show="dadosConsulta.data != ''")
-        v-select(v-model="dadosConsulta.hora" 
-        :rules="[rules.required]" 
+        v-select(v-model="dadosConsulta.hora"
+        :rules="[rules.required]"
         :items="horasDisponiveis" label="Horario Disponível")
-    v-layout  
+    v-layout
       v-flex(xs12 v-show="dadosConsulta.hora != ''")
         v-text-field(
-          v-model='dadosConsulta.paciente' 
-          :rules="[rules.required]" 
+          v-model='dadosConsulta.paciente'
+          :rules="[rules.required]"
           label="Nome Paciente")
     v-layout
       v-flex(v-if="dadosConsulta.paciente != ''")
@@ -80,8 +80,11 @@ export default {
   mixins: [mixins],
   data () {
     return {
-      showSenha: false, logged: false, snackbar: false, menu: false,
-      dadosConsulta:{
+      showSenha: false,
+      logged: false,
+      snackbar: false,
+      menu: false,
+      dadosConsulta: {
         atendente: '',
         paciente: '',
         especialidade: '',
@@ -95,44 +98,39 @@ export default {
       senhasJson,
       senha: '',
       atendentes: [
-        { value: 'Lola Bunny', text: 'Lola Bunny'},
-        { value: 'Petunio', text: 'Petúnio'},
-        { value: 'Pete Puma', text: 'Pete Puma'}
+        { value: 'Lola Bunny', text: 'Lola Bunny' },
+        { value: 'Petunio', text: 'Petúnio' },
+        { value: 'Pete Puma', text: 'Pete Puma' }
       ],
-      especialidades: [
-        { value: 'Dermatologia', text: 'Dermatologia'},
-        { value: 'Cardiologia', text: 'Cardiologia'},
-        { value: 'Gastroenterologia', text: 'Gastroenterologia'},
-
-      ],
+      
       especialidade: null,
       medicosLista: [],
       medicosFromJson,
       date: '',
-      horasDisponiveis: [],
-      
+      horasDisponiveis: []
+
     }
   },
   watch: {
-      'atendente': function () {
-        this.senha = senhasJson[this.atendente].senha
-        },
-      'especialidade': function () {
-        if( this.especialidade != '') {
+    'atendente': function () {
+      this.senha = senhasJson[this.atendente].senha
+    },
+    'especialidade': function () {
+      if (this.especialidade != '') {
         this.medicosLista = medicosFromJson[this.especialidade].medicos
         this.dadosConsulta.especialidade = this.especialidade
-        }
-      },
-      'date': function () {
-        if ( this.date != '') {
+      }
+    },
+    'date': function () {
+      if (this.date != '') {
         this.dadosConsulta.data = this.date
         const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/verificar-horarios`
-        this.axios.post( url , this.dadosConsulta)
+        this.axios.post(url, this.dadosConsulta)
           .then(data => {
             this.horasDisponiveis = data.data
           })
-        }
-      },
+      }
+    }
   },
   methods: {
     verificarSenha () {
@@ -144,7 +142,7 @@ export default {
     marcarConsulta () {
       console.log(this.dadosConsulta)
       const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/agendar-consulta`
-      this.axios.post( url, this.dadosConsulta )
+      this.axios.post(url, this.dadosConsulta)
         .then(data => {
           this.snackbar = true
           this.$refs.form.reset()
@@ -162,7 +160,7 @@ export default {
           this.horasDisponiveis = []
           this.$emit('atualizarDados')
         })
-    },
+    }
   }
 }
 </script>

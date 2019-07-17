@@ -1,13 +1,16 @@
 <template lang='pug'>
 v-container(fluid)
-  v-layout()
-    v-flex.ml-3(lg2 md2 sm2 xs4)
+  v-layout(wrap)
+    v-flex.ml-2(lg2 md2 sm2 xs6)
       v-btn(outline @click="listarTodos") Todas
-    v-flex(lg4 md4 sm4 xs6)
-      v-select(v-model="medicoSecionado" 
-      :items="listaDeMedicos" 
+    v-flex.pr-5(lg3 md3 sm4 xs4)
+      v-select(v-model="medicoSelecionado"
+      :items="listaDeMedicos"
       label="Por Medico")
-    v-flex(lg4 md4 sm4 xs6)
+    v-flex.mr-3(md3 lg3 sm4 xs6 pr-2)
+        v-select(v-model="especialidadeSelecionada"
+        :items="especialidades" label="Por Especialidade")  
+    v-flex(lg2 md2 sm4 xs6)
       v-menu( ref="menu"
         v-model="menu"
         :close-on-content-click="true"
@@ -25,7 +28,7 @@ v-container(fluid)
             readonly
             v-on="on"
           )
-        v-date-picker(v-model="dataSelecionada" 
+        v-date-picker(v-model="dataSelecionada"
         @input="menu2 = false"
         )
   table.table.table
@@ -34,13 +37,15 @@ v-container(fluid)
         th(scope="col") Data
         th(scope="col") Paciente
         th(scope="col") Medico
+        th(scope="col") Especialidade
         th(scope="col") Hora
-        th(scope="col") {{consultasParaoTemplate.length}} 
+        th(scope="col") {{consultasParaoTemplate.length}}
     tbody
       tr(v-for="(consulta, i) in consultasParaoTemplate" :key="i")
         th(scope="row") {{consulta.data | formatDate}}
         th {{consulta.paciente}}
         th {{consulta.medico}}
+        th {{consulta.especialidade}}
         th {{consulta.data | formatDateOnlyHour}}
 </template>
 
@@ -55,7 +60,8 @@ export default {
       menu: false,
       consultasParaoTemplate: [],
       consultasPassadas: [],
-      medicoSecionado: null,
+      medicoSelecionado: null,
+      especialidadeSelecionada: null,
       dataSelecionada: ''
 
     }
@@ -64,25 +70,36 @@ export default {
     this.atualizarDados()
   },
   watch: {
-    'medicoSecionado': function () {
-      if ( this.medicoSecionado != null) {  
+    'medicoSelecionado': function () {
+      if (this.medicoSelecionado != null) {
         this.consultasParaoTemplate = []
         for (let i = 0; i < this.consultasPassadas.length; i++) {
-          const element = this.consultasPassadas[i];
-          if(element.medico === this.medicoSecionado){
+          const element = this.consultasPassadas[i]
+          if (element.medico === this.medicoSelecionado) {
             this.consultasParaoTemplate.push(element)
           }
         }
-      }        
+      }
     },
-    'dataSelecionada': function () {
-      if ( this.dataSelecionada != ''){
+    'especialidadeSelecionada': function () {
+      if (this.especialidadeSelecionada != null) {
         this.consultasParaoTemplate = []
         for (let i = 0; i < this.consultasPassadas.length; i++) {
-          const element = this.consultasPassadas[i];
-          const elementDate = moment(element.data).format("YYYY MM DD")
-          const dataSelecionada = moment(this.dataSelecionada).format("YYYY MM DD")
-          if(elementDate === dataSelecionada){
+          const element = this.consultasPassadas[i]
+          if (element.especialidade === this.especialidadeSelecionada) {
+            this.consultasParaoTemplate.push(element)
+          }
+        }
+      }
+    },
+    'dataSelecionada': function () {
+      if (this.dataSelecionada != '') {
+        this.consultasParaoTemplate = []
+        for (let i = 0; i < this.consultasPassadas.length; i++) {
+          const element = this.consultasPassadas[i]
+          const elementDate = moment(element.data).format('YYYY MM DD')
+          const dataSelecionada = moment(this.dataSelecionada).format('YYYY MM DD')
+          if (elementDate === dataSelecionada) {
             this.consultasParaoTemplate.push(element)
           }
         }
@@ -90,29 +107,30 @@ export default {
     }
   },
   methods: {
-    atualizarDados() {
-      //Puxar e Ordenar lista de consultas
+    atualizarDados () {
+      // Puxar e Ordenar lista de consultas
       this.consultasPassadas = []
       const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/listar-consultas`
-       this.axios.get(url)
+      this.axios.get(url)
         .then(data => {
-          const listaConsultasBase = data.data.sort( ( a, b ) => new Date(a.data) - new Date(b.data))
+          const listaConsultasBase = data.data.sort((a, b) => new Date(a.data) - new Date(b.data))
           for (let i = 0; i < listaConsultasBase.length; i++) {
-          const element = listaConsultasBase[i];
-            if(new Date(element.data) < new Date()) {
-              this.consultasPassadas.push(element)    
+            const element = listaConsultasBase[i]
+            if (new Date(element.data) < new Date()) {
+              this.consultasPassadas.push(element)
             }
           }
           this.consultasParaoTemplate = this.consultasPassadas
         })
     },
     listarTodos () {
-        this.medicoSecionado = null
-        this.dataSelecionada = ''
-        this.consultasParaoTemplate = this.consultasPassadas
-      }    
+      this.medicoSelecionado = null
+      this.especialidadeSelecionada = null
+      this.dataSelecionada = ''
+      this.consultasParaoTemplate = this.consultasPassadas
+    }
   }
-  }
+}
 </script>
 
 <style scoped>

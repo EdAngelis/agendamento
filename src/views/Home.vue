@@ -32,7 +32,7 @@ export default {
   },
   data () {
     return {
-      aba: "Agendamentos",
+      aba: 'Agendamentos'
     }
   },
   methods: {

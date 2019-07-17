@@ -1,5 +1,5 @@
 <template lang='pug'>
-div  
+div
   v-toolbar.toolbar(flat)
     v-menu(v-if="windowWidth<450" bottom left)
       template( v-slot:activator="{ on }")
@@ -17,15 +17,15 @@ import { vueWindowSizeMixin } from 'vue-window-size'
 export default {
   name: 'toolbar',
   mixins: [vueWindowSizeMixin],
-  data() {
+  data () {
     return {
       aba: '',
       items: [
-          {title: 'Agendamentos'},
-          {title: 'Historico'},
-          {title: 'Nova Consulta'}
+        { title: 'Agendamentos' },
+        { title: 'Historico' },
+        { title: 'Nova Consulta' }
       ]
-    }    
+    }
   },
   methods: {
     mudarAba (item) {
