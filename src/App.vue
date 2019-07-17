@@ -1,5 +1,5 @@
 <template lang="pug">
-  v-app.pa-0.ma-0
+  v-app
     router-view
 </template>
 
@@ -16,3 +16,9 @@ export default {
   }
 }
 </script>
+
+<style>
+html{
+}
+</style>
+

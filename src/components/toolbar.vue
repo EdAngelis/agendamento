@@ -21,9 +21,9 @@ export default {
     return {
       aba: '',
       items: [
-        { title: 'Agendamentos' },
-        { title: 'Historico' },
-        { title: 'Nova Consulta' }
+        { title: 'Agendamentos'},
+        { title: 'Historico'},
+        { title: 'Nova Consulta'}
       ]
     }
   },

@@ -1,10 +1,8 @@
 const router = require('express').Router();
 const agendamentoSchema = require('../models/agendamento-models');
-const repositorio = require('../repositorio');
 const moment = require ('moment')
 
 router.post('/agendar-consulta', async (req, res, next) => {
-   const dataComHora=moment(`${req.body.data} ${req.body.hora}`)
    const newAgendamento = await new agendamentoSchema({
     atendente: req.body.atendente,
     especialidade: req.body.especialidade,
@@ -12,25 +10,23 @@ router.post('/agendar-consulta', async (req, res, next) => {
     data: moment(`${req.body.data} ${req.body.hora}`),
     paciente: req.body.paciente
   });
-  // Exibir Data e Horario
-  //moment(newAgendamento.data).format("MM DD YYYY HH:mm")
      await newAgendamento.save()
         .then(result => {
-            console.log("Agendado")
             res.status(201).send({msg: 'Consulta Agendada'})
         })
  });
+
 router.get('/listar-consultas', async (req, res, next) => {
   await agendamentoSchema.find()
    .then(data => {
      res.send(data)
    })
 });
+
 router.delete('/remover-consulta/:id', async (req, res, next) => {
-  console.log(req.params.id)
   await agendamentoSchema.findByIdAndDelete({_id: req.params.id})
     .then(data => {
-      res.status(200).send('Consulta Cancelada')
+      res.status(200).send({msg:'Consulta Cancelada', color:'red'})
     }).catch(err => {
       res.status(404).send("")
     }) 
@@ -62,7 +58,7 @@ router.put('/editar-consulta', async (req, res, next) => {
           result.data = newData
           result.save()
             .then(data => {
-              res.status(200).send('Cunsulta Editada')
+              res.status(200).send({msg:'Consulta Editada', color:'info'})
             }).catch(err => {
                res.status(404).send('Consulta não Salva')
             })

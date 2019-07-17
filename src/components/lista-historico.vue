@@ -1,5 +1,6 @@
 <template lang='pug'>
 v-container(fluid)
+  //Exibir lista por atributo, seleções.
   v-layout(wrap)
     v-flex.ml-2(lg2 md2 sm2 xs6)
       v-btn(outline @click="listarTodos") Todas
@@ -31,6 +32,7 @@ v-container(fluid)
         v-date-picker(v-model="dataSelecionada"
         @input="menu2 = false"
         )
+  //Tabela com lista de Consultas      
   table.table.table
     thead
       tr
@@ -69,6 +71,7 @@ export default {
   mounted () {
     this.atualizarDados()
   },
+  //Assistir mudanças das Variaveis de seleção
   watch: {
     'medicoSelecionado': function () {
       if (this.medicoSelecionado != null) {
@@ -107,8 +110,8 @@ export default {
     }
   },
   methods: {
+    //Requisição axios para obter e Ordenar lista de consultas, guardando apenas consultas anteriores a data atual
     atualizarDados () {
-      // Puxar e Ordenar lista de consultas
       this.consultasPassadas = []
       const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/listar-consultas`
       this.axios.get(url)
@@ -120,9 +123,11 @@ export default {
               this.consultasPassadas.push(element)
             }
           }
+          //Criar uma Lista que irá para template e poderá ser alterada, e manter outra que não poderá ser alterada.
           this.consultasParaoTemplate = this.consultasPassadas
         })
     },
+    //resetar filtro da lista e mostrar todas as consultas
     listarTodos () {
       this.medicoSelecionado = null
       this.especialidadeSelecionada = null

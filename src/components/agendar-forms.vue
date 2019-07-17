@@ -1,6 +1,7 @@
 <template lang='pug'>
 v-container.pa-1.ma-0
   v-form(ref="form")
+    //Selecionar Atendente
     v-layout(v-show="!logged")
       v-flex(md6 lg6 xs12 pr-2)
         v-select(v-model="atendente"
@@ -17,6 +18,7 @@ v-container.pa-1.ma-0
           :rules="[rules.required, rules.checkPassord]"
           @click:append="showSenha = !showSenha"
           required)
+    //Selecionar Especialidade e Medico      
     v-layout(v-show="logged")
       v-flex(md6 lg6 sm6 xs12 pr-2)
         v-select(v-model="especialidade"
@@ -28,6 +30,7 @@ v-container.pa-1.ma-0
         box
         :rules="[rules.required]"
         :items="medicosLista" label="Médico")
+    //Selecionar Data e Hora
     v-layout(v-show="dadosConsulta.medico != ''")
       v-flex.pr-1(xs12 md6 lg6)
         v-menu( ref="menu"
@@ -54,6 +57,7 @@ v-container.pa-1.ma-0
         v-select(v-model="dadosConsulta.hora"
         :rules="[rules.required]"
         :items="horasDisponiveis" label="Horario Disponível")
+    //Nome Paciente
     v-layout
       v-flex(xs12 v-show="dadosConsulta.hora != ''")
         v-text-field(
@@ -65,7 +69,7 @@ v-container.pa-1.ma-0
         v-btn(outline @click="marcarConsulta") Marcar Consulta
     v-snackbar(
       v-model="snackbar"
-      color="red"
+      color="success"
       bottom
       vertical
       :timeout= 3000 ) Consulta Agendada
@@ -94,33 +98,31 @@ export default {
 
       },
       atendente: null,
-      senhaAtendente: '',
-      senhasJson,
-      senha: '',
-      atendentes: [
-        { value: 'Lola Bunny', text: 'Lola Bunny' },
-        { value: 'Petunio', text: 'Petúnio' },
-        { value: 'Pete Puma', text: 'Pete Puma' }
-      ],
-      
       especialidade: null,
       medicosLista: [],
+      horasDisponiveis: [],
       medicosFromJson,
+      senhasJson,
+      senhaAtendente: '',
       date: '',
-      horasDisponiveis: []
+      senha: '',
 
     }
   },
   watch: {
     'atendente': function () {
+      if (this.atendente) {
       this.senha = senhasJson[this.atendente].senha
+      }
     },
+    //Assistir seleção de especialidade para poder Selecionar medicos daquela especialidade
     'especialidade': function () {
-      if (this.especialidade != '') {
+      if (this.especialidade) {
         this.medicosLista = medicosFromJson[this.especialidade].medicos
         this.dadosConsulta.especialidade = this.especialidade
       }
     },
+    //Requisição para obter horarios disponiveis 
     'date': function () {
       if (this.date != '') {
         this.dadosConsulta.data = this.date
@@ -140,26 +142,27 @@ export default {
       }
     },
     marcarConsulta () {
-      console.log(this.dadosConsulta)
       const url = `${process.env.VUE_APP_API_BASE_URL}/agendamento/agendar-consulta`
       this.axios.post(url, this.dadosConsulta)
         .then(data => {
           this.snackbar = true
-          this.$refs.form.reset()
-          this.logged = false
-          this.dadosConsulta.atendente = '',
-          this.dadosConsulta.paciente = '',
-          this.dadosConsulta.especialidade = '',
-          this.dadosConsulta.medico = '',
-          this.dadosConsulta.data = '',
-          this.dadosConsulta.hora = '',
-          this.senhaAtendente = '',
-          this.atendente = null,
-          this.especialidade = null,
-          this.medicosLista = [],
-          this.horasDisponiveis = []
-          this.$emit('atualizarDados')
+          this.resetarVariaveis()
         })
+    },
+    resetarVariaveis() {
+      this.$refs.form.reset()
+      this.logged = false
+      this.dadosConsulta.atendente = '',
+      this.dadosConsulta.paciente = '',
+      this.dadosConsulta.especialidade = '',
+      this.dadosConsulta.medico = '',
+      this.dadosConsulta.data = '',
+      this.dadosConsulta.hora = '',
+      this.senhaAtendente = '',
+      this.atendente = null,
+      this.especialidade = null,
+      this.medicosLista = [],
+      this.horasDisponiveis = []
     }
   }
 }

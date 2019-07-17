@@ -8,6 +8,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
+//Usando moment para formatar data que será exibida no Template
 Vue.filter('formatDateOnlyHour', function (value) {
   if (value) {
     return moment(String(value)).format('HH:mm')
