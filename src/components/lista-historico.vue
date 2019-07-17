@@ -8,7 +8,7 @@ v-container(fluid)
       v-select(v-model="medicoSelecionado"
       :items="listaDeMedicos"
       label="Por Medico")
-    v-flex.mr-3(md3 lg3 sm4 xs6 pr-2)
+    v-flex.mr-3(v-if="windowWidth>500" md3 lg3 sm4 xs6 pr-2)
         v-select(v-model="especialidadeSelecionada"
         :items="especialidades" label="Por Especialidade")  
     v-flex(lg2 md2 sm4 xs6)
@@ -39,7 +39,7 @@ v-container(fluid)
         th(scope="col") Data
         th(scope="col") Paciente
         th(scope="col") Medico
-        th(scope="col") Especialidade
+        th(scope="col" v-if="windowWidth>500") Especialidade
         th(scope="col") Hora
         th(scope="col") {{consultasParaoTemplate.length}}
     tbody
@@ -47,7 +47,7 @@ v-container(fluid)
         th(scope="row") {{consulta.data | formatDate}}
         th {{consulta.paciente}}
         th {{consulta.medico}}
-        th {{consulta.especialidade}}
+        th(v-if="windowWidth>500") {{consulta.especialidade}}
         th {{consulta.data | formatDateOnlyHour}}
 </template>
 
